@@ -18,10 +18,7 @@ export const CookieOrderPage: FC = () => {
     mixins: [] as Mixins[],
   });
 
-  const { storedValue: cart, setValue: setCart } = useLocalStorage<ICartItem[]>(
-    "cart",
-    []
-  );
+  const { setValue: setCart } = useLocalStorage<ICartItem[]>("cart", []);
 
   const toggleBoolean = (prop: keyof typeof cookieSelection) => {
     setCookieSelection((prev) => ({ ...prev, [prop]: !prev[prop] }));
