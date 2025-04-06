@@ -1,0 +1,86 @@
+.navbarWrapper {
+  display: flex;
+  justify-content: flex-end;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 60px;
+  align-items: center;
+  background-color: white;
+  z-index: 1000;
+}
+
+.navbarList {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  padding-right: 20px;
+  align-items: center;
+}
+
+.navbarCartIcon {
+  font-size: 1.8rem;
+}
+
+/* Circle background */
+.navbarBeforeAfter::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  border-radius: 50%;
+  z-index: 1; /* behind the text */
+}
+
+/* Text on top of the circle */
+.navbarBeforeAfter::before {
+  content: attr(data-count);
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  /* same width/height so you can center it */
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 11px;
+  line-height: 1.2;
+  z-index: 2; /* on top of the circle */
+
+  /* Nudge the text a little with transform */
+  transform: translate(0px, -1.2px);
+}
+
+.navbarCartIconNinePlus::before {
+  /* Nudge the text a little with transform */
+  transform: translate(1px, -1.2px) !important;
+}
+
+.navbarGrowItem {
+  margin-right: auto;
+  position: relative;
+}
+
+.navbarList > li {
+  margin-left: 20px;
+}
+
+.navbarList > li > a {
+  text-decoration: none;
+  color: black;
+  display: inline; /* Don't stretch like a flex child */
+  line-height: 1; /* Prevent excess vertical padding */
+  padding: 0;
+}
+
+.navbarWrapper + div {
+  margin-top: 60px;
+}
