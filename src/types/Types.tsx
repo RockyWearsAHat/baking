@@ -1,72 +1,59 @@
+import { ICookiesItem } from "./Cookies";
+import { Mixins } from "./Mixins";
+
 export interface IMenuProductCard {
   name: string;
   link: string;
   imageName: string;
 }
 
-//Mixins common between all items
-type mixins =
-  | "chocolateChips"
-  | "peanutButterChips"
-  | "butterfingerPieces"
-  | "caramel"
-  | "m&ms"
-  | "reesesPieces"
-  | "whiteChocolateChips"
-  | "coconut"
-  | "oats"
-  | "walnuts";
-
-type frostingFlavors = "vanilla" | "chocolate" | "creamCheese" | "buttercream";
-
 //Common properties for all items
-interface commonProps {
+export interface commonProps {
+  mixins?: Mixins | Mixins[];
   isGlutenFree?: boolean;
   isDairyFree?: boolean;
   isNutFree?: boolean;
   isEggFree?: boolean;
   isVegan?: boolean;
   otherAllergens?: string | string[];
-  mixins?: mixins | mixins[];
 }
 
-type cookieFlavors = "chocolateChip" | "oatmealRaisin" | "peanutButter";
+export type frostingFlavors =
+  | "vanilla"
+  | "chocolate"
+  | "creamCheese"
+  | "buttercream";
 
-interface ICookiesItem extends commonProps {
-  type: "cookies";
-  flavor: cookieFlavors;
-}
+export type brownieFlavors = "chocolate";
 
-type brownieFlavors = "chocolate";
-
-interface IBrowniesItem extends Omit<commonProps, "mixins"> {
+interface IBrowniesItem extends Omit<commonProps, "Mixins"> {
   type: "brownies";
   flavor: brownieFlavors;
-  toppings?: mixins | mixins[];
-  mixins?: mixins | "fudge" | (mixins | "fudge")[];
+  toppings?: Mixins | Mixins[];
+  Mixins?: Mixins | "fudge" | (Mixins | "fudge")[];
 }
 
-type muffinFlavors = "lemonBlueberry" | "chocolateChip" | "bananaNut";
+export type muffinFlavors = "lemonBlueberry" | "chocolateChip" | "bananaNut";
 
 interface IMuffinsItem extends commonProps {
   type: "muffins";
   flavor: muffinFlavors;
-  toppings?: mixins | mixins[];
+  toppings?: Mixins | Mixins[];
 }
 
 interface cakeCommonProps extends commonProps {
   cakeFlavor: cakeFlavors | cakeFlavors[];
   frostingFlavor: frostingFlavors;
-  mixins?: mixins | mixins[];
+  Mixins?: Mixins | Mixins[];
 }
 
-type cakeFlavors = "vanilla" | "chocolate";
+export type cakeFlavors = "vanilla" | "chocolate";
 
 interface ICupcakesItem extends cakeCommonProps {
   type: "cupcakes";
 }
 
-type cakeFillings =
+export type cakeFillings =
   | "whippedCream"
   | "creamCheese"
   | "buttercream"

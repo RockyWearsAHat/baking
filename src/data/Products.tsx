@@ -4,7 +4,7 @@ export const productCards: Array<IMenuProductCard> = [
   {
     name: "Cookies",
     link: "/products/cookies",
-    imageName: "CC-Cookie.jpg",
+    imageName: "Cookie.jpg",
   },
   {
     name: "Brownies",
