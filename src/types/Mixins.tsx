@@ -21,24 +21,34 @@ export type Mixins =
 export const MIXIN_DETAILS = {
   chocolateChips: {
     value: "chocolateChips",
-    name: "Chocolate Chips",
+    name: "Ghirardelli chocolate",
     price: 2,
     allergens: ["dairy"],
   },
   peanutButterChips: {
     value: "peanutButterChips",
-    name: "Peanut Butter Chips",
-    price: 0,
+    name: "peanut butter chips",
+    price: 3,
     allergens: ["dairy", "peanuts"],
   },
   butterfingerPieces: {
     value: "butterfingerPieces",
-    name: "Butterfinger Pieces",
+    name: "Butterfinger pieces",
     price: 0,
     allergens: ["dairy", "peanuts"],
   },
-  caramel: { value: "caramel", name: "Caramel Pieces", price: 0 },
-  "m&ms": { value: "m&ms", name: "M&Ms", price: 0, allergens: ["dairy"] },
+  caramel: {
+    value: "caramel",
+    name: "caramel pieces",
+    price: 0,
+    allergens: ["gluten"],
+  },
+  "m&ms": {
+    value: "m&ms",
+    name: "M&Ms",
+    price: 0,
+    allergens: ["dairy"],
+  },
   reesesPieces: {
     value: "reesesPieces",
     name: "Reese's Pieces",
@@ -47,13 +57,25 @@ export const MIXIN_DETAILS = {
   },
   whiteChocolateChips: {
     value: "whiteChocolateChips",
-    name: "White Chocolate Chips",
+    name: "Ghirardelli white chocolate",
     price: 0,
     allergens: ["dairy"],
   },
-  coconut: { value: "coconut", name: "Coconut", price: 0 },
-  oats: { value: "oats", name: "Oats", price: 0 },
-  walnuts: { value: "walnuts", name: "Walnuts", price: 0 },
+  coconut: {
+    value: "coconut",
+    name: "coconut",
+    price: 0,
+  },
+  oats: {
+    value: "oats",
+    name: "oats",
+    price: 0,
+  },
+  walnuts: {
+    value: "walnuts",
+    name: "walnuts",
+    price: 0,
+  },
 } as const;
 
 export type MixinKeys = keyof typeof MIXIN_DETAILS;

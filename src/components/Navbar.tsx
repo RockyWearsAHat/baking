@@ -39,6 +39,18 @@ export const Navbar: FC = () => {
             <IoCart className={styles.navbarCartIcon} />
           </Link>
         </li>
+        <img
+          src="/logo.png"
+          alt=""
+          style={{
+            width: "80px",
+            height: "80px",
+            position: "absolute",
+            top: "-11px",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        />
         <li>
           <Link to="/">Home</Link>
         </li>
