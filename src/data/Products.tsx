@@ -13,17 +13,17 @@ export const productCards: Array<IMenuProductCard> = [
   },
   {
     name: "Cakes",
-    link: "/products/brownies",
+    link: "/products/cakes",
     imageName: "Cake2.jpg",
   },
   {
     name: "Muffins",
-    link: "/products/brownies",
+    link: "/products/muffins",
     imageName: "Muffin.jpg",
   },
   {
     name: "Cupcakes",
-    link: "/products/brownies",
+    link: "/products/cupcakes",
     imageName: "Cupcake.jpg",
   },
   {

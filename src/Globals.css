@@ -6,7 +6,9 @@
   font-optical-sizing: auto;
   font-weight: 300;
   font-style: normal;
+}
 
+:root {
   /* Variables to change property and properties dependant on it */
   --menu-gap: 5px;
 }

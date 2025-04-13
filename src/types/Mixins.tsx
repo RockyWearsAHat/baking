@@ -21,7 +21,7 @@ export type Mixins =
 export const MIXIN_DETAILS = {
   chocolateChips: {
     value: "chocolateChips",
-    name: "Ghirardelli chocolate",
+    name: "Ghirardelli chocolate chips",
     price: 2,
     allergens: ["dairy"],
   },
@@ -41,7 +41,6 @@ export const MIXIN_DETAILS = {
     value: "caramel",
     name: "caramel pieces",
     price: 0,
-    allergens: ["gluten"],
   },
   "m&ms": {
     value: "m&ms",
@@ -57,13 +56,13 @@ export const MIXIN_DETAILS = {
   },
   whiteChocolateChips: {
     value: "whiteChocolateChips",
-    name: "Ghirardelli white chocolate",
+    name: "Ghirardelli white chocolate chips",
     price: 0,
     allergens: ["dairy"],
   },
   coconut: {
     value: "coconut",
-    name: "coconut",
+    name: "coconut chips",
     price: 0,
   },
   oats: {
@@ -75,6 +74,7 @@ export const MIXIN_DETAILS = {
     value: "walnuts",
     name: "walnuts",
     price: 0,
+    allergens: ["nuts"],
   },
 } as const;
 

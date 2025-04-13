@@ -1,44 +1,43 @@
 import { FC, useEffect, useState } from "react";
-import { cookieFlavors } from "../types/Cookies";
+import { cookieFlavors, cookieFlavorAllergens } from "../types/Cookies";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { ICartItem } from "../types/Types";
 import styles from "../styles/CookieOrderPage.module.css";
 import { getAllMixins, getMixinDetails, Mixins } from "../types/Mixins";
+
 import { CiWheat } from "react-icons/ci";
 import { LuEgg, LuMilk } from "react-icons/lu";
 import { GiPeanut } from "react-icons/gi";
-import React from "react";
 import { IoIosArrowDown } from "react-icons/io";
 
 export const convertNameToTitleCase = (name: string) => {
   return name.replace(/(^\w)|([-\s]\w)/g, (m) => m.toUpperCase());
 };
 
-// Define the allergy options with icons and conflict keys
 const allergyOptions = [
   {
     value: "gluten",
     label: "Gluten Free",
     icon: <CiWheat />,
-    conflict: "gluten",
+    allergen: "gluten",
   },
   {
     value: "dairy",
     label: "Dairy Free",
     icon: <LuMilk />,
-    conflict: "dairy",
+    allergen: "dairy",
   },
   {
     value: "peanuts",
     label: "Nut Free",
     icon: <GiPeanut />,
-    conflict: "peanuts",
+    allergen: "peanuts",
   },
   {
     value: "eggs",
     label: "Egg Free",
     icon: <LuEgg />,
-    conflict: "eggs",
+    allergen: "eggs",
   },
 ];
 
@@ -48,6 +47,8 @@ interface AllergySectionProps {
   cookieSelection: any;
   setCookieSelection: any;
   mixins: any[];
+  setAllergensContained: (allergens: string) => void;
+  allergensContained: string;
 }
 
 export const AllergySection: React.FC<AllergySectionProps> = ({
@@ -56,10 +57,13 @@ export const AllergySection: React.FC<AllergySectionProps> = ({
   cookieSelection,
   setCookieSelection,
   mixins,
+  setAllergensContained,
+  allergensContained,
 }) => {
   const handleOptionClick = (option: (typeof allergyOptions)[number]) => {
     // Prevent toggling if the option is disabled because of a conflict
     if (isOptionDisabled(option)) return;
+
     if (selectedAllergies.includes(option.value)) {
       setSelectedAllergies(selectedAllergies.filter((a) => a !== option.value));
     } else {
@@ -71,7 +75,7 @@ export const AllergySection: React.FC<AllergySectionProps> = ({
     // Disable if any selected mixin's details include the conflicting allergen.
     for (const mixin of mixins) {
       const details = getMixinDetails(mixin);
-      if (details.allergens && details.allergens.includes(option.conflict)) {
+      if (details.allergens && details.allergens.includes(option.allergen)) {
         return true;
       }
     }
@@ -83,10 +87,8 @@ export const AllergySection: React.FC<AllergySectionProps> = ({
   let nuts: any[] = [];
   let eggs: any[] = [];
 
-  const [allergensContained, setAllergensContained] = useState<string>("");
-
   useEffect(() => {
-    const allergensContained = [
+    const allergensContainedSet = [
       ...new Set(
         cookieSelection.mixins.reduce((acc: string[], mixin: Mixins) => {
           const details = getMixinDetails(mixin);
@@ -113,7 +115,7 @@ export const AllergySection: React.FC<AllergySectionProps> = ({
     ];
 
     setSelectedAllergies(
-      selectedAllergies.filter((a) => !allergensContained.includes(a))
+      selectedAllergies.filter((a) => !allergensContainedSet.includes(a))
     );
 
     const allergensMap: Record<string, string[]> = {
@@ -161,9 +163,13 @@ export const AllergySection: React.FC<AllergySectionProps> = ({
       }
     );
 
-    setAllergensContained(groupedDescriptions.join(", and "));
-
-    console.log(dairy, gluten, nuts, eggs);
+    const finalDescription =
+      groupedDescriptions.length > 1
+        ? groupedDescriptions.slice(0, -1).join(", ") +
+          ", and " +
+          groupedDescriptions.slice(-1)
+        : groupedDescriptions[0];
+    setAllergensContained(finalDescription);
   }, [cookieSelection.mixins]);
 
   return (
@@ -197,19 +203,30 @@ export const AllergySection: React.FC<AllergySectionProps> = ({
           :{" "}
           {allergensContained.substring(0, 1).toUpperCase() +
             allergensContained.substring(1)}
+          .
         </p>
       )}
-      <input
-        type="text"
-        placeholder="Other Allergens"
-        value={cookieSelection.otherAllergens}
-        onChange={(e) =>
+      <div
+        id="otherAllergensInput"
+        contentEditable={true}
+        suppressContentEditableWarning={true}
+        onInput={(e) => {
+          const text = e.currentTarget.textContent?.trim();
+
+          // If the text is empty, clear any residual markup (like a stray <br>)
+          if (text === "") {
+            e.currentTarget.innerHTML = "";
+          }
+
+          // Update your state with the current text
           setCookieSelection((prev: any) => ({
             ...prev,
-            otherAllergens: e.target.value,
-          }))
-        }
+            otherAllergens: text,
+          }));
+        }}
         className={styles.allergyInput}
+        // Optional: use a data attribute for reusability
+        data-placeholder="Other Allergens/Special Requests"
       />
     </div>
   );
@@ -224,10 +241,13 @@ export const CookieOrderPage: FC = () => {
   // Note: We’ve replaced the individual allergen booleans with a single selectedAllergies array.
   const [cookieSelection, setCookieSelection] = useState({
     flavor: "chocolateChip",
+    price: 40,
     selectedAllergies: [] as string[],
     otherAllergens: "",
     mixins: [] as Mixins[],
   });
+
+  const [allergensContained, setAllergensContained] = useState("");
 
   const { setValue: setCart } = useLocalStorage<ICartItem[]>("cart", []);
 
@@ -252,7 +272,8 @@ export const CookieOrderPage: FC = () => {
       item: {
         type: "cookies",
         flavor: cookieSelection.flavor as cookieFlavors,
-        // selectedAllergies: cookieSelection.selectedAllergies,
+        price: cookieSelection.price,
+        selectedAllergies: cookieSelection.selectedAllergies,
         otherAllergens: cookieSelection.otherAllergens,
         mixins: cookieSelection.mixins,
       },
@@ -261,16 +282,36 @@ export const CookieOrderPage: FC = () => {
     setCart((prev) => [...prev, newItem]);
   };
 
+  const calculateTotalPrice = (basePrice: number, mixins: Mixins[]) => {
+    let total = basePrice;
+    mixins.forEach((m) => {
+      const details = getMixinDetails(m);
+      total += details.price || 0;
+    });
+    return total;
+  };
+
   const allMixinsDetails = getAllMixins().map((m) => getMixinDetails(m));
 
   const flavorOptions = [
-    { value: "chocolateChip", name: "Chocolate Chip", image: "Cookie.jpg" },
+    {
+      value: "chocolateChip",
+      name: "Chocolate Chip",
+      image: "Cookie.jpg",
+      price: 40,
+    },
     {
       value: "oatmealRaisin",
       name: "Oatmeal Raisin",
       image: "Oatmeal-Rasin.jpg",
+      price: 35,
     },
-    { value: "peanutButter", name: "Peanut Butter", image: "PB-Cookie.jpg" },
+    {
+      value: "peanutButter",
+      name: "Peanut Butter",
+      image: "PB-Cookie.jpg",
+      price: 30,
+    },
   ];
 
   // Simple scroll utility.
@@ -300,6 +341,7 @@ export const CookieOrderPage: FC = () => {
                 setCookieSelection((prev) => ({
                   ...prev,
                   flavor: flavor.value,
+                  price: flavor.price,
                 }));
                 scrollToSection("mixinSection");
               }}
@@ -322,7 +364,7 @@ export const CookieOrderPage: FC = () => {
             <div key={i} className={styles.mixinCard}>
               <label
                 className={styles.mixinLabel}
-                style={{ backgroundImage: `url(/${m.value}.jpg)` }}
+                style={{ backgroundImage: `url("/${m.value}.jpg")` }}
               >
                 <input
                   type="checkbox"
@@ -348,13 +390,13 @@ export const CookieOrderPage: FC = () => {
           className={styles.nextSectionButton}
         >
           <IoIosArrowDown />
-          <IoIosArrowDown />
-          <IoIosArrowDown />
         </div>
       </div>
       <div id="allergySection" className={styles.allergySection}>
         {/* Render the allergen options inline */}
         <AllergySection
+          allergensContained={allergensContained}
+          setAllergensContained={setAllergensContained}
           selectedAllergies={cookieSelection.selectedAllergies}
           setSelectedAllergies={(allergies) =>
             setCookieSelection((prev) => ({
@@ -366,9 +408,110 @@ export const CookieOrderPage: FC = () => {
           cookieSelection={cookieSelection}
           mixins={cookieSelection.mixins}
         />
-        {/* Styled "Other Allergens" textbox */}
       </div>
-      <button onClick={handleAddToCart}>Add to Cart</button>
+      <div id="reviewSection" className={styles.reviewSection}>
+        <h1 className={styles.reviewTitle}>Review Your Order</h1>
+        <div className={styles.reviewDetails}>
+          <p>
+            Flavor:{" "}
+            {
+              flavorOptions.find(
+                (flavor) => flavor.value === cookieSelection.flavor
+              )?.name
+            }
+          </p>
+          <p>Price: ${cookieSelection.price}</p>
+          <p>
+            Mixins:{" "}
+            {cookieSelection.mixins.length > 0
+              ? cookieSelection.mixins
+                  .map(
+                    (item) =>
+                      convertNameToTitleCase(getMixinDetails(item).name) +
+                      (getMixinDetails(item).price &&
+                      getMixinDetails(item).price > 0
+                        ? ` ($${getMixinDetails(item).price.toFixed(2)})`
+                        : " (Free)")
+                  )
+                  .join(", ")
+              : "No mixins"}
+          </p>
+          <p>
+            Allergy Warning:{" "}
+            {allergensContained
+              ? allergensContained.substring(0, 1).toUpperCase() +
+                allergensContained
+                  .replace(/contain/, "will contain")
+                  .substring(1)
+              : "None"}
+          </p>
+          <p>
+            This Product Contains:{" "}
+            {[
+              ...[
+                ...cookieFlavorAllergens[
+                  cookieSelection.flavor as keyof typeof cookieFlavorAllergens
+                ],
+                ...cookieSelection.mixins
+                  .map((m) => {
+                    return getMixinDetails(m).allergens || [];
+                  })
+                  .reduce((acc, curr) => {
+                    return [...acc, ...curr];
+                  }, [])
+                  .filter((item, index, arr) => {
+                    return arr.indexOf(item) === index;
+                  }),
+              ]
+                .filter(
+                  (item) => !cookieSelection.selectedAllergies.includes(item)
+                )
+                .filter((item, index, arr) => {
+                  return arr.indexOf(item) === index;
+                }),
+            ].length > 0
+              ? [
+                  ...cookieFlavorAllergens[
+                    cookieSelection.flavor as keyof typeof cookieFlavorAllergens
+                  ],
+                  ...cookieSelection.mixins
+                    .map((m) => {
+                      return getMixinDetails(m).allergens || [];
+                    })
+                    .reduce((acc, curr) => {
+                      return [...acc, ...curr];
+                    }, [])
+                    .filter((item, index, arr) => {
+                      return arr.indexOf(item) === index;
+                    }),
+                ]
+                  .filter(
+                    (item) => !cookieSelection.selectedAllergies.includes(item)
+                  )
+                  .filter((item, index, arr) => {
+                    return arr.indexOf(item) === index;
+                  })
+                  .map((i) => i.substring(0, 1).toUpperCase() + i.substring(1))
+                  .join(", ")
+              : "No allergens"}
+          </p>
+          {cookieSelection.otherAllergens && (
+            <p>
+              Other Allergens/Special Requests: {cookieSelection.otherAllergens}
+            </p>
+          )}
+          <p className={styles.reviewTotal}>
+            Total Price: $
+            {calculateTotalPrice(cookieSelection.price, cookieSelection.mixins)}
+          </p>
+        </div>
+        <button
+          onClick={() => handleAddToCart()}
+          className={styles.addToCartButton}
+        >
+          Add to Cart
+        </button>
+      </div>
     </>
   );
 };

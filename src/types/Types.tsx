@@ -10,11 +10,7 @@ export interface IMenuProductCard {
 //Common properties for all items
 export interface commonProps {
   mixins?: Mixins | Mixins[];
-  isGlutenFree?: boolean;
-  isDairyFree?: boolean;
-  isNutFree?: boolean;
-  isEggFree?: boolean;
-  isVegan?: boolean;
+  selectedAllergies?: string[];
   otherAllergens?: string | string[];
 }
 

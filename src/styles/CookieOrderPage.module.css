@@ -98,13 +98,6 @@ select {
   transform: scaleX(1);
 }
 
-.allergySection {
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
 .flavorTitle {
   line-height: 0;
   transform: translateY(-20px);
@@ -139,7 +132,7 @@ select {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: calc(
-    100vw / 5
+    100vw / 4
   ); /* Each mixin takes 20% of the viewport width */
   gap: 20px;
   overflow-x: auto; /* Enable horizontal scrolling */
@@ -152,7 +145,7 @@ select {
 @media (max-width: 1000px) {
   .mixinWrapper {
     grid-auto-columns: calc(
-      100vw / 4
+      100vw / 3
     ); /* Each mixin takes 33.33% of the viewport width */
   }
 }
@@ -160,7 +153,7 @@ select {
 @media (max-width: 750px) {
   .mixinWrapper {
     grid-auto-columns: calc(
-      100vw / 3
+      100vw / 2
     ); /* Each mixin takes 33.33% of the viewport width */
   }
 }
@@ -220,7 +213,6 @@ select {
   outline: white 0px solid;
   transition: 0.2s all ease-in-out;
   padding-inline: 5px;
-  white-space: nowrap;
 }
 
 .mixinLabel:has(input:checked) ~ .mixinDetails {
@@ -230,9 +222,13 @@ select {
 .mixinTitle {
   position: absolute;
   text-align: center;
-  top: 100px;
+  top: 70px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.mixinTitle > p {
+  white-space: nowrap;
 }
 
 .mixinPrice {
@@ -320,7 +316,6 @@ select {
 
 /* Allergy Section container */
 .allergySection {
-  margin-top: 2rem;
   width: 100vw;
   height: calc(100vh - 60px);
   border-top: 2px solid #eaeaea;
@@ -342,7 +337,8 @@ select {
 
 /* Wrapper for the allergy option cards */
 .allergyCardsWrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
   width: 100%;
   flex-wrap: wrap;
   padding-block: 10px;
@@ -350,18 +346,29 @@ select {
   gap: 20px;
 }
 
+@media screen and (max-width: 850px) {
+  .allergyCardsWrapper {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .allergyCardsWrapper {
+    grid-template-columns: repeat(1, minmax(150px, 1fr));
+  }
+}
+
 /* Each allergy card */
 .allergyCard {
   text-align: center;
   justify-content: center;
   display: flex;
-  flex-grow: 1;
   align-items: center;
   padding: 10px 15px;
-  border: 1px solid #ccc;
+  outline: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease, border 0.2s ease;
+  transition: transform 0.2s ease, outline 0.2s ease-in-out;
   user-select: none;
 }
 
@@ -372,7 +379,8 @@ select {
 
 /* Styling when an allergy is selected */
 .selectedAllergy {
-  border: 2px solid rgb(78, 76, 91);
+  transform: scale(1.02) !important;
+  outline: 2px solid rgb(78, 76, 91);
   background-color: #f0f0f0;
 }
 
@@ -392,6 +400,19 @@ select {
   border-radius: 4px;
   margin: 10px auto;
   font-size: 1rem;
+  line-height: 1.5rem;
+  max-height: calc(1.5rem * 2);
+  overflow-y: auto;
+}
+
+.allergyInput:empty:before {
+  content: "Other Allergens/Special Requests";
+  color: #aaa; /* Customize the placeholder color */
+  pointer-events: none; /* Allow clicks to pass through to the div */
+}
+
+.allergyInput:focus {
+  outline: none;
 }
 
 .allergenWarning {
@@ -411,12 +432,12 @@ select {
 }
 
 .nextSectionButton {
-  font-size: 30px;
+  font-size: 40px;
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  animation: bounce 1.5s infinite;
+  animation: bounce 0.8s infinite ease-in;
 }
 
 .nextSectionButton:hover {
@@ -433,4 +454,42 @@ select {
   100% {
     transform: translateX(-50%) translateY(0);
   }
+}
+
+.reviewSection {
+  border-top: 2px solid #eaeaea;
+  width: 100vw;
+  height: calc(100vh - 62px);
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.reviewDetails {
+  outline: 2px solid #eaeaea;
+  padding: 10px;
+  width: 80vw;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.reviewTotal {
+  font-weight: bold;
+}
+
+.addToCartButton {
+  margin-top: 20px;
+  padding: 10px 20px;
+  outline: 2px solid #ccc;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.addToCartButton:hover {
+  transform: scale(1.03);
+  outline-color: rgb(78, 76, 91);
 }
