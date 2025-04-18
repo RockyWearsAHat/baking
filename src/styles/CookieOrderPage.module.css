@@ -428,8 +428,8 @@ select {
   background-color: rgb(255, 231, 74);
 }
 
-.recipeContainsWarning {
-}
+/* .recipeContainsWarning {
+} */
 
 /* Style for the "Other Allergens" input */
 .allergyInput {

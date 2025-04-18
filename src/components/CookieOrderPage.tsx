@@ -59,7 +59,7 @@ const AllergySection: FC<AllergySectionProps> = ({
   selectedAllergies,
   onChangeAllergies,
   mixins,
-  allergenWarning,
+  // allergenWarning,
   allergensContained,
   onOtherAllergensChange,
   scrollToSection,
