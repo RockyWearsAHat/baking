@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { CookieFlavor, cookieFlavorAllergens } from "../types/Cookies";
+import { CookieFlavor } from "../types/Cookies";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { ICartItem } from "../types/Types";
 import styles from "../styles/CookieOrderPage.module.css";
@@ -9,7 +9,7 @@ import { LuEgg, LuMilk } from "react-icons/lu";
 import { GiPeanut } from "react-icons/gi";
 import { IoIosArrowDown } from "react-icons/io";
 
-import { flavors } from "../data/CookieFlavors";
+import { flavors, cookieFlavorAllergens } from "../data/CookieFlavors";
 
 const allergyOptions = [
   { value: "gluten", label: "Gluten Free", icon: <CiWheat /> },
@@ -52,6 +52,7 @@ interface AllergySectionProps {
   allergenWarning: string;
   onOtherAllergensChange: (value: string) => void;
   scrollToSection: (id: string) => void;
+  flavor: CookieFlavor; // Added
 }
 
 const AllergySection: FC<AllergySectionProps> = ({
@@ -62,6 +63,7 @@ const AllergySection: FC<AllergySectionProps> = ({
   allergensContained,
   onOtherAllergensChange,
   scrollToSection,
+  flavor, // Destructure the new prop
 }) => {
   // Disable an option if any mixin reintroduces that allergen
   const isDisabled = (opt: string) =>
@@ -71,55 +73,57 @@ const AllergySection: FC<AllergySectionProps> = ({
     console.log(allergensContained);
   }, [allergensContained]);
 
+  // Use the flavor prop directly
+  const defaultAllergens = cookieFlavorAllergens[flavor];
+  const isCookieDefaultAllergen = (value: string) =>
+    defaultAllergens.includes(value);
+
   return (
     <div className={styles.allergySectionWrapper}>
       <h1 className={styles.allergyTitle}>Allergies & Special Instructions</h1>
 
       <div className={styles.allergyCardsWrapper}>
-        {allergyOptions.map((opt) => (
-          <div
-            key={opt.value}
-            className={
-              (selectedAllergies.includes(opt.value)
-                ? styles.selectedAllergy
-                : "") +
-              " " +
-              (isDisabled(opt.value) ? styles.disabledAllergy : "") +
-              " " +
-              styles.allergyCard
-            }
-            onClick={() => {
-              if (!isDisabled(opt.value)) {
-                onChangeAllergies(
-                  selectedAllergies.includes(opt.value)
-                    ? selectedAllergies.filter((a) => a !== opt.value)
-                    : [...selectedAllergies, opt.value]
-                );
+        {allergyOptions.map((opt) => {
+          const defaultAllergy = isCookieDefaultAllergen(opt.value);
+          return (
+            <div
+              key={opt.value}
+              className={
+                (selectedAllergies.includes(opt.value)
+                  ? styles.selectedAllergy
+                  : "") +
+                " " +
+                (isDisabled(opt.value) ? styles.disabledAllergy : "") +
+                " " +
+                styles.allergyCard +
+                " " +
+                (defaultAllergy ? styles.defaultAllergy : "")
               }
-            }}
-          >
-            {opt.icon}
-            <span style={{ paddingLeft: "5px" }}>{opt.label}</span>
-          </div>
-        ))}
+              onClick={() => {
+                if (!isDisabled(opt.value)) {
+                  onChangeAllergies(
+                    selectedAllergies.includes(opt.value)
+                      ? selectedAllergies.filter((a) => a !== opt.value)
+                      : [...selectedAllergies, opt.value]
+                  );
+                }
+              }}
+            >
+              {opt.icon}
+              <span style={{ paddingLeft: "5px" }}>{opt.label}</span>
+            </div>
+          );
+        })}
       </div>
 
-      {allergensContained != "" && allergenWarning && (
+      {(defaultAllergens.filter((val) => !selectedAllergies.includes(val))
+        .length > 0 ||
+        allergensContained) && (
         <p className={styles.allergyWarning}>
-          <span
-            style={{
-              textDecoration: "underline",
-              fontWeight: "bold",
-            }}
-          >
+          <span style={{ textDecoration: "underline", fontWeight: "bold" }}>
             ALLERGEN WARNING
           </span>
-          :{" "}
-          {allergensContained
-            ? allergensContained.substring(0, 1).toUpperCase() +
-              allergensContained.substring(1)
-            : ""}
-          .
+          : {allergensContained}
         </p>
       )}
 
@@ -173,6 +177,59 @@ export const CookieOrderPage: FC = () => {
     }));
   }, [cookieSelection.mixins]);
 
+  useEffect(() => {
+    const baseAllergens = cookieFlavorAllergens[cookieSelection.flavor].filter(
+      (a) => !cookieSelection.selectedAllergies.includes(a)
+    );
+    const updatedAllergies = new Set(cookieSelection.selectedAllergies);
+    const mixinAllergens: Record<string, string[]> = {};
+
+    cookieSelection.mixins.forEach((m) => {
+      const details = getMixinDetails(m);
+      const filtered = (details.allergens || []).filter(
+        (a) => !updatedAllergies.has(a)
+      );
+      (details.allergens || []).forEach((a) => {
+        if (updatedAllergies.has(a)) updatedAllergies.delete(a);
+      });
+      if (filtered.length) {
+        mixinAllergens[m] = filtered;
+      }
+    });
+
+    // Compare old vs. new allergies to avoid infinite re-render
+    const newAllergiesArray = Array.from(updatedAllergies).sort();
+    const oldAllergiesArray = [...cookieSelection.selectedAllergies].sort();
+    if (
+      JSON.stringify(newAllergiesArray) !== JSON.stringify(oldAllergiesArray)
+    ) {
+      setCookieSelection((prev) => ({
+        ...prev,
+        selectedAllergies: newAllergiesArray,
+      }));
+    }
+
+    const segments: string[] = [];
+    if (baseAllergens.length) {
+      segments.push(`This recipe contains ${baseAllergens.join(", ")}`);
+    }
+    Object.entries(mixinAllergens).forEach(([mixinName, allergens]) => {
+      if (allergens.length) {
+        segments.push(
+          `${
+            getMixinDetails(mixinName as Mixins).name
+          } contains ${allergens.join(", ")}`
+        );
+      }
+    });
+
+    setAllergensContained(segments.join(", and "));
+  }, [
+    cookieSelection.flavor,
+    cookieSelection.mixins,
+    cookieSelection.selectedAllergies,
+  ]);
+
   /* --------------------------------
      Helpers
   -------------------------------- */
@@ -210,104 +267,7 @@ export const CookieOrderPage: FC = () => {
       behavior: "smooth",
     });
 
-  let dairy: any[] = [],
-    eggs: any[] = [],
-    gluten: any[] = [],
-    nuts: any[] = [];
-
   const [allergensContained, setAllergensContained] = useState<string>("");
-
-  useEffect(() => {
-    const allergensContainedSet = [
-      ...new Set(
-        cookieSelection.mixins.reduce((acc: string[], mixin: Mixins) => {
-          const details = getMixinDetails(mixin);
-          if (details.allergens) {
-            acc.push(...details.allergens);
-
-            console.log(details.allergens);
-            if (details.allergens.includes("dairy")) {
-              dairy.push(mixin);
-            }
-            if (details.allergens.includes("eggs")) {
-              eggs.push(mixin);
-            }
-            if (details.allergens.includes("gluten")) {
-              gluten.push(mixin);
-            }
-            if (details.allergens.includes("peanuts")) {
-              nuts.push(mixin);
-            }
-          }
-          return acc;
-        }, [])
-      ),
-    ];
-
-    let filteredAllergens = cookieSelection.selectedAllergies.filter(
-      (a) => !allergensContainedSet.includes(a)
-    );
-
-    setCookieSelection((prev) => ({
-      ...prev,
-      selectedAllergies: filteredAllergens,
-    }));
-
-    const allergensMap: Record<string, string[]> = {
-      dairy: dairy.map((mixin) => getMixinDetails(mixin).name),
-      gluten: gluten.map((mixin) => getMixinDetails(mixin).name),
-      peanuts: nuts.map((mixin) => getMixinDetails(mixin).name),
-      eggs: eggs.map((mixin) => getMixinDetails(mixin).name),
-    };
-
-    // Build a map of mixin -> set of allergens
-    const mixinAllergens: Record<string, Set<string>> = {};
-    Object.entries(allergensMap).forEach(([allergen, theseMixins]) => {
-      theseMixins.forEach((mixin) => {
-        if (!mixinAllergens[mixin]) mixinAllergens[mixin] = new Set();
-        mixinAllergens[mixin].add(allergen);
-      });
-    });
-
-    // Group by identical sets of allergens
-    const groupedMap: Record<string, string[]> = {};
-    Object.entries(mixinAllergens).forEach(([mixinName, allergenSet]) => {
-      const sortedAllergens = Array.from(allergenSet).sort();
-      const key = sortedAllergens.join(",");
-      if (!groupedMap[key]) groupedMap[key] = [];
-      groupedMap[key].push(mixinName);
-    });
-
-    // Return a description grouped by allergens
-    const groupedDescriptions = Object.entries(groupedMap).map(
-      ([key, mixinNames]) => {
-        const allergenList = key.split(",");
-        const allergenText =
-          allergenList.length > 1
-            ? allergenList.slice(0, -1).join(", ") +
-              " and " +
-              allergenList.slice(-1)
-            : allergenList[0];
-        const mixinText =
-          mixinNames.length > 1
-            ? mixinNames.slice(0, -1).join(", ") +
-              " and " +
-              mixinNames.slice(-1)
-            : mixinNames[0];
-        return `${mixinText} contain ${allergenText}`;
-      }
-    );
-
-    const finalDescription =
-      groupedDescriptions.length > 1
-        ? groupedDescriptions.slice(0, -1).join(", ") +
-          ", and " +
-          groupedDescriptions.slice(-1)
-        : groupedDescriptions[0];
-    setAllergensContained(finalDescription);
-
-    console.log(finalDescription);
-  }, [cookieSelection.mixins]);
 
   /* --------------------------------
      UI
@@ -400,11 +360,12 @@ export const CookieOrderPage: FC = () => {
           }
           allergensContained={allergensContained}
           mixins={cookieSelection.mixins}
-          allergenWarning={allergenString ? allergenString : ""}
+          allergenWarning={allergenString || ""}
           onOtherAllergensChange={(val) =>
             setCookieSelection({ ...cookieSelection, otherAllergens: val })
           }
           scrollToSection={scrollToSection}
+          flavor={cookieSelection.flavor} // Added
         />
       </div>
 

@@ -399,7 +399,7 @@ select {
   outline: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease, outline 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
   user-select: none;
 }
 
@@ -417,10 +417,18 @@ select {
 
 /* Disabled style for allergy options that are in conflict */
 .disabledAllergy {
-  pointer-events: none;
-  background-color: rgb(255, 136, 136);
-  color: red;
-  opacity: 0.5;
+  pointer-events: none !important;
+  background-color: rgb(255, 136, 136) !important;
+  color: red !important;
+  opacity: 0.5 !important;
+}
+
+.defaultAllergy:not(.selectedAllergy) {
+  transition: all 0.2s ease-in-out;
+  background-color: rgb(255, 231, 74);
+}
+
+.recipeContainsWarning {
 }
 
 /* Style for the "Other Allergens" input */

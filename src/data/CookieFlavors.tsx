@@ -1,3 +1,5 @@
+import { CookieFlavor } from "../types/Cookies";
+
 export const flavors = [
   {
     value: "chocolateChip",
@@ -18,3 +20,9 @@ export const flavors = [
     price: 30,
   },
 ];
+
+export const cookieFlavorAllergens: Record<CookieFlavor, string[]> = {
+  chocolateChip: ["gluten", "dairy", "eggs"],
+  oatmealRaisin: ["gluten", "dairy", "eggs"],
+  peanutButter: ["gluten", "dairy", "peanuts", "eggs"],
+};
