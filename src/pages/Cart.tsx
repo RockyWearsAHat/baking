@@ -36,6 +36,7 @@ export const Cart: FC = () => {
                     item: {
                       type: "cookies",
                       flavor: "chocolateChip",
+                      price: 40,
                     },
                     quantity: 1,
                   },
