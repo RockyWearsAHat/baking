@@ -4,7 +4,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { Helmet } from "react-helmet-async";
 import { MenuProductCard } from "../components/MenuProductCard";
 
-import { productCards } from "../data/Products";
+import { productCards } from "../data/ProductCards";
 
 export const Home: FC = () => {
   return (

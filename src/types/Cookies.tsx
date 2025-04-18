@@ -1,19 +1,17 @@
 import { commonProps } from "./Types";
 
-export type cookieFlavors = "chocolateChip" | "oatmealRaisin" | "peanutButter";
+// Simplified flavor definition
+export type CookieFlavor = "chocolateChip" | "oatmealRaisin" | "peanutButter";
 
-export interface ICookiesItem extends commonProps {
-  type: "cookies";
-  flavor: cookieFlavors;
-  price: number;
-}
-
-export type ICookieFlavorAllergens = {
-  [key in cookieFlavors]: string[];
-};
-
-export const cookieFlavorAllergens: ICookieFlavorAllergens = {
+// Assign known allergens per flavor
+export const cookieFlavorAllergens: Record<CookieFlavor, string[]> = {
   chocolateChip: ["dairy", "gluten", "eggs"],
   oatmealRaisin: ["dairy", "gluten", "eggs"],
   peanutButter: ["dairy", "gluten", "peanuts", "eggs"],
 };
+
+export interface ICookiesItem extends commonProps {
+  type: "cookies";
+  flavor: CookieFlavor;
+  price: number;
+}

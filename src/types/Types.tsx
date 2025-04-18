@@ -68,7 +68,7 @@ interface ICakeItem extends Omit<cakeCommonProps, "frostingFlavor"> {
   fillings?: cakeFillings | cakeFillings[];
 }
 
-type IItem =
+export type IItem =
   | ICookiesItem
   | IBrowniesItem
   | IMuffinsItem
